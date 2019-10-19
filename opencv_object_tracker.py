@@ -87,10 +87,11 @@ while True:
 
        # check to see if the tracking was a success
         if success:
-            print(box)
             (x, y, w, h) = [int(v) for v in box]
-            cv2.rectangle(frame, (x, y), (x + w, y + h),
-                        (0, 255, 0), 2)
+            centerX, centerY = int(x + w/2), int(y + h/2)
+            cv2.rectangle(frame, (x, y), (x + w, y + h),(0, 255, 0), 2)
+            cv2.circle(frame, (centerX, centerY), 1, (0, 255, 0), 1)
+            print(centerX, centerY)
 
         # update the FPS counter
         fps.update()
