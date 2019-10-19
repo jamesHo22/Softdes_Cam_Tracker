@@ -38,14 +38,32 @@ class View:
 
 #MARK: controller
 class Controller:
-    pass
+    def handleEvent(self,event):
+        #checks for the x in the corner
+        if event.type == pygame.QUIT:
+            #stop looping
+            return False
+        #listens for key presses
+        elif event.type == pygame.KEYDOWN:
+
+            #excape keypress
+            if event.key == pygame.K_ESCAPE:
+                #stop looping
+                return False
+            else:
+                return True
+        else:
+            return True
 
 #MARK: Model
 class Model:
     pass
 
-#create a view object
+#create model, view, and controller objects
 view = View(640,700)
+controller = Controller()
+model = Model()
+
 #draw the content in the view
 view.draw()
 
@@ -59,18 +77,8 @@ while mainLoop:
     #MARK: event listeners
     for event in pygame.event.get():
 
-        #checks for the x in the corner
-        if event.type == pygame.QUIT:
-            #stop looping
-            mainLoop = False
-
-        #listens for key presses
-        elif event.type == pygame.KEYDOWN:
-
-            #excape keypress
-            if event.key == pygame.K_ESCAPE:
-                #stop looping
-                mainLoop = False
+        #handle events
+        mainLoop = controller.handleEvent(event)
 
     #update the display
     pygame.display.flip()
