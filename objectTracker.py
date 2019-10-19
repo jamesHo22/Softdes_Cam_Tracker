@@ -15,6 +15,7 @@ class View:
         self.width = screenWidth
         self.height = screenHeight
         self.backgroundColor = backgroundColor
+        self.objects = []
         #sets up the pygame display window
         self.initWindow()
 
@@ -35,6 +36,16 @@ class View:
         """a method which draws all of the pygame surfaces"""
         self.window.blit(self.background, (0,0))
 
+        for obj in self.objects:
+            obj.draw(self)
+
+        #update the display
+        pygame.display.flip()
+
+    def addObj(self, obj):
+
+
+        self.objects.append(obj)
 
 #MARK: controller
 class Controller:
@@ -59,10 +70,41 @@ class Controller:
 class Model:
     pass
 
+class ball:
+    """A class which draws a circle on the screen at a given set of cordinates"""
+    def __init__(self,view, pos = [300,300],color = (255,0,255),radius = 30):
+
+        #sets personal variables
+        self.pos = pos
+        self.color = color
+        self.radius = radius
+        #creates the surface for the ball
+        self.surface = pygame.Surface((2*self.radius,2*self.radius))
+
+        #add itself to the view
+        view.addObj(self)
+
+    def draw (self,view):
+        """This is a method which will display the object to the screen"""
+
+        #draw the circle on to the surface
+        pygame.draw.circle(self.surface,self.color,(self.radius,self.radius),self.radius)
+        #optimize the surface in memory so it is faster to draw
+        self.surface = self.surface.convert_alpha()
+
+        #display the circle
+        view.window.blit(self.surface,self.pos)
+
+
+
+
 #create model, view, and controller objects
 view = View(640,700)
 controller = Controller()
 model = Model()
+
+#create the cursor which will follow the user's hand
+cursor = ball(view)
 
 #draw the content in the view
 view.draw()
@@ -80,8 +122,8 @@ while mainLoop:
         #handle events
         mainLoop = controller.handleEvent(event)
 
-    #update the display
-    pygame.display.flip()
+    #draw objects
+    view.draw()
 
 #quit the program and close the window
 pygame.quit()
