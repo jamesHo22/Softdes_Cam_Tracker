@@ -68,8 +68,37 @@ class Controller:
 
 #MARK: Model
 class Model:
-    pass
+    def __init__(self):
+        #create view, and controller objects
+        self.view = View(640,700)
+        self.controller = Controller()
 
+    def runGameLoop(self):
+        #create the cursor which will follow the user's hand
+        cursor = ball(self.view)
+
+        #draw the content in the view
+        self.view.draw()
+
+        #MARK: Runtime Variables
+        mainLoop = True
+        FPS = 60
+
+        #MARK: gameLoop
+        while mainLoop:
+
+            #MARK: event listeners
+            for event in pygame.event.get():
+
+                #handle events
+                mainLoop = self.controller.handleEvent(event)
+
+            #draw objects
+            self.view.draw()
+
+        #quit the program and close the window
+        pygame.quit()
+#MARK: object classes
 class ball:
     """A class which draws a circle on the screen at a given set of cordinates"""
     def __init__(self,view, pos = [300,300],color = (255,0,255),radius = 30):
@@ -95,39 +124,14 @@ class ball:
         #display the circle
         view.window.blit(self.surface,self.pos)
 
+def runGame(argv):
+    """A function which runs the game when called"""
+    model = Model()
+    model.runGameLoop()
 
-
-
-#create model, view, and controller objects
-view = View(640,700)
-controller = Controller()
-model = Model()
-
-#create the cursor which will follow the user's hand
-cursor = ball(view)
-
-#draw the content in the view
-view.draw()
-
-#MARK: Runtime Variables
-mainLoop = True
-FPS = 60
-
-#MARK: gameLoop
-while mainLoop:
-
-    #MARK: event listeners
-    for event in pygame.event.get():
-
-        #handle events
-        mainLoop = controller.handleEvent(event)
-
-    #draw objects
-    view.draw()
-
-#quit the program and close the window
-pygame.quit()
-
-"""if __name__ == '__main__':
+#if the program is called from the command line
+if __name__ == '__main__':
     import sys
-     print("Args are:*",sys.argv)"""
+    #print("Args are:*",sys.argv)
+    #run the program
+    runGame(sys.argv)
