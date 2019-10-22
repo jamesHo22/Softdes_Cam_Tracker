@@ -75,7 +75,7 @@ class Model:
 
     def runGameLoop(self):
         #create the cursor which will follow the user's hand
-        cursor = Ball(self.view)
+        cursor = Goal(self.view)
 
         #draw the content in the view
         self.view.draw()
@@ -100,6 +100,7 @@ class Model:
         pygame.quit()
 #MARK: object classes
 class GameObject:
+
     def __init__(self,view, pos = None,color = (255,255,255), *geometry):
         #if no positional argument was supplied
         if pos == None:
@@ -128,6 +129,7 @@ class GameObject:
         view.addObj(self)
 
     def draw(self, view):
+        """A method which draws the object to the screen."""
         if self.geometry[0] == 'circle':
             #draw the circle on to the surface
             pygame.draw.circle(self.surface,self.color,(self.geometry[1],self.geometry[1]),self.geometry[1],self.geometry[2])
@@ -144,9 +146,15 @@ class GameObject:
 
 class Ball (GameObject):
     """A class which draws a ball on the screen"""
-    def __init__(self,view, pos = [300,300],color = (255,0,255),radius = 30):
+    def __init__(self,view, pos = [300,300],color = (255,255,255),radius = 30):
 
         super().__init__(view,pos,color,'circle',radius,0)
+
+class Goal (GameObject):
+    """A class which draws a ball on the screen"""
+    def __init__(self,view, pos = [300,300],color = (255,255,255),width = 30,height = 30,thickness = 2):
+
+        super().__init__(view,pos,color,'rectangle',width,height,thickness)
 
 def runGame(argv):
     """A function which runs the game when called"""
