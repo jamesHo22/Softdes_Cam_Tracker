@@ -75,7 +75,7 @@ class Model:
 
     def runGameLoop(self):
         #create the cursor which will follow the user's hand
-        cursor = ball(self.view)
+        cursor = Ball(self.view)
 
         #draw the content in the view
         self.view.draw()
@@ -99,30 +99,54 @@ class Model:
         #quit the program and close the window
         pygame.quit()
 #MARK: object classes
-class ball:
-    """A class which draws a circle on the screen at a given set of cordinates"""
-    def __init__(self,view, pos = [300,300],color = (255,0,255),radius = 30):
+class GameObject:
+    def __init__(self,view, pos = None,color = (255,255,255), *geometry):
+        #if no positional argument was supplied
+        if pos == None:
+            #set the default position
+            pos = [300,300]
 
-        #sets personal variables
+        #if no geometry was provided make the default circle
+        if not geometry:
+            #set the default geometry
+            geometry = ('circle',30,0)
+
+        #set up object Variables
+        self.view = view
         self.pos = pos
         self.color = color
-        self.radius = radius
-        #creates the surface for the ball
-        self.surface = pygame.Surface((2*self.radius,2*self.radius))
+        self.geometry = geometry
 
-        #add itself to the view
+        #creates the surface for the object changing the size based on the geometry provided
+        if self.geometry[0] == 'circle':
+            self.surface = pygame.Surface((2*self.geometry[1],2*self.geometry[1]))
+        elif self.geometry[0] == 'rectangle':
+            #creates the surface for the ball
+            self.surface = pygame.Surface((self.geometry[1],self.geometry[2]))
+
+        #add the object to the view
         view.addObj(self)
 
-    def draw (self,view):
-        """This is a method which will display the object to the screen"""
+    def draw(self, view):
+        if self.geometry[0] == 'circle':
+            #draw the circle on to the surface
+            pygame.draw.circle(self.surface,self.color,(self.geometry[1],self.geometry[1]),self.geometry[1],self.geometry[2])
 
-        #draw the circle on to the surface
-        pygame.draw.circle(self.surface,self.color,(self.radius,self.radius),self.radius)
+        elif self.geometry[0] == 'rectangle':
+            pygame.draw.rect(self.surface,self.color,pygame.Rect(0, 0,self.geometry[1],self.geometry[2]),self.geometry[3])
+
         #optimize the surface in memory so it is faster to draw
         self.surface = self.surface.convert_alpha()
 
         #display the circle
         view.window.blit(self.surface,self.pos)
+
+
+class Ball (GameObject):
+    """A class which draws a ball on the screen"""
+    def __init__(self,view, pos = [300,300],color = (255,0,255),radius = 30):
+
+        super().__init__(view,pos,color,'circle',radius,0)
 
 def runGame(argv):
     """A function which runs the game when called"""
