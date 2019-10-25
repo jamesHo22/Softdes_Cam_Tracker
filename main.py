@@ -1,5 +1,7 @@
 #MARK: Imports
 import pygame
+import tracker
+from imutils.video import VideoStream
 #initalize pygame
 pygame.init()
 
@@ -84,8 +86,12 @@ class Model:
         mainLoop = True
         FPS = 60
 
+        # Make a tracker object
+        newTracker = tracker.newTracker()
+        
         #MARK: gameLoop
         while mainLoop:
+            
 
             #MARK: event listeners
             for event in pygame.event.get():
