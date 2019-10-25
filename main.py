@@ -45,28 +45,43 @@ class View:
         pygame.display.flip()
 
     def addObj(self, obj):
-
-
+        """a method which adds an object to the lit of objects to draw"""
         self.objects.append(obj)
 
 #MARK: controller
 class Controller:
+
+    def __init__(self):
+        self.isRunning = True
+        self.mousePos = ()
+
     def handleEvent(self,event):
+        """Handle the events from the pygame event colors"""
         #checks for the x in the corner
         if event.type == pygame.QUIT:
             #stop looping
-            return False
+            self.isRunning = False
         #listens for key presses
         elif event.type == pygame.KEYDOWN:
 
             #excape keypress
             if event.key == pygame.K_ESCAPE:
                 #stop looping
-                return False
+                self.isRunning = False
             else:
-                return True
+                self.isRunning = True
+        elif event.type == pygame.MOUSEMOTION:
+            self.mousePos = event.pos
         else:
-            return True
+            self.isRunning = True
+
+    def getControlInput(self,input):
+        """gets the posion that the controller is at"""
+        if input == 'pygame':
+            return self.mousePos
+        elif input == 'openCV':
+            pass
+            #get the opencv tracked cords
 
 #MARK: Model
 class Model:
@@ -76,14 +91,20 @@ class Model:
         self.controller = Controller()
 
     def runGameLoop(self):
-        #create the cursor which will follow the user's hand
-        cursor = Goal(self.view)
+        #create the game objects
+
+        goal = Goal(self.view)
+        startButton = Button(self.view)
+        startButton.visible = True
+
+        ball = Ball(self.view)
+        ball.visible = True
 
         #draw the content in the view
         self.view.draw()
 
         #MARK: Runtime Variables
-        mainLoop = True
+        running = True
         FPS = 60
 
         # Make a tracker object
@@ -91,20 +112,26 @@ class Model:
         
         
         #MARK: gameLoop
-        while mainLoop:
-            
+        while running:
 
             #MARK: event listeners
             for event in pygame.event.get():
 
                 #handle events
-                mainLoop = self.controller.handleEvent(event)
+                self.controller.handleEvent(event)
+                running = self.controller.isRunning
+
+            #update positions
+            cntPos = self.controller.getControlInput('pygame')
+            if cntPos != None:
+                ball.pos = cntPos
 
             #draw objects
             self.view.draw()
 
         #quit the program and close the window
         pygame.quit()
+
 #MARK: object classes
 class GameObject:
 
@@ -124,42 +151,52 @@ class GameObject:
         self.pos = pos
         self.color = color
         self.geometry = geometry
+        self.visible = False
 
         #creates the surface for the object changing the size based on the geometry provided
         if self.geometry[0] == 'circle':
-            self.surface = pygame.Surface((2*self.geometry[1],2*self.geometry[1]))
+            self.surface = pygame.Surface((2*self.geometry[1],2*self.geometry[1]),pygame.SRCALPHA, 32)
         elif self.geometry[0] == 'rectangle':
             #creates the surface for the ball
-            self.surface = pygame.Surface((self.geometry[1],self.geometry[2]))
+            self.surface = pygame.Surface((self.geometry[1],self.geometry[2]),pygame.SRCALPHA, 32)
 
         #add the object to the view
         view.addObj(self)
 
     def draw(self, view):
-        """A method which draws the object to the screen."""
-        if self.geometry[0] == 'circle':
-            #draw the circle on to the surface
-            pygame.draw.circle(self.surface,self.color,(self.geometry[1],self.geometry[1]),self.geometry[1],self.geometry[2])
+        """A method which draws its parent object to the screen if the object is supposed to be drawn"""
+        if self.visible:
+            if self.geometry[0] == 'circle':
+                #draw the circle on to the surface
+                pygame.draw.circle(self.surface,self.color,(self.geometry[1],self.geometry[1]),self.geometry[1],self.geometry[2])
 
-        elif self.geometry[0] == 'rectangle':
-            pygame.draw.rect(self.surface,self.color,pygame.Rect(0, 0,self.geometry[1],self.geometry[2]),self.geometry[3])
+            elif self.geometry[0] == 'rectangle':
+                pygame.draw.rect(self.surface,self.color,pygame.Rect(0, 0,self.geometry[1],self.geometry[2]),self.geometry[3])
 
-        #optimize the surface in memory so it is faster to draw
-        self.surface = self.surface.convert_alpha()
+            #optimize the surface in memory so it is faster to draw
+            self.surface = self.surface.convert_alpha()
 
-        #display the circle
-        view.window.blit(self.surface,self.pos)
+            #display the circle
+            view.window.blit(self.surface,self.pos)
+        else:
+            return
 
 
 class Ball (GameObject):
     """A class which draws a ball on the screen"""
-    def __init__(self,view, pos = [300,300],color = (255,255,255),radius = 30):
+    def __init__(self,view, pos = [300,300],color = (255,140,0),radius = 30):
 
         super().__init__(view,pos,color,'circle',radius,0)
 
 class Goal (GameObject):
-    """A class which draws a ball on the screen"""
+    """A class which draws a goal on the screen"""
     def __init__(self,view, pos = [300,300],color = (255,255,255),width = 30,height = 30,thickness = 2):
+
+        super().__init__(view,pos,color,'rectangle',width,height,thickness)
+
+class Button (GameObject):
+    """A class which draws a button on the screen"""
+    def __init__(self,view, pos = [300,300],color = (255,255,255),width = 90,height = 70,thickness = 0):
 
         super().__init__(view,pos,color,'rectangle',width,height,thickness)
 
