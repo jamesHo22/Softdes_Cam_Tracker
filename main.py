@@ -89,6 +89,7 @@ class Model:
         # Make a tracker object
         newTracker = tracker.newTracker()
         
+        
         #MARK: gameLoop
         while mainLoop:
             
