@@ -12,7 +12,6 @@ import cv2
 
 class newTracker():
     
-
     def __init__(self):
         # construct the argument parser and parse the arguments
         ap = argparse.ArgumentParser()
@@ -81,6 +80,7 @@ class newTracker():
         '''
         returns: the x and y position of the tracked object in the frame
         '''
+        centerX, centerY = None, None
         # grab the current frame, then handle if we are using a
         # VideoStream or VideoCapture object
         frame = vs.read()
@@ -104,10 +104,13 @@ class newTracker():
 
         # check to see if the tracking was a success
             if success:
+                print('track SUCCESS')
                 (x, y, w, h) = [int(v) for v in box]
                 centerX, centerY = int(x + w/2), int(y + h/2)
                 cv2.rectangle(frame, (x, y), (x + w, y + h),(0, 255, 0), 2)
                 cv2.circle(frame, (centerX, centerY), 1, (0, 255, 0), 1)
+            else:
+                print('no tracking')
                 
 
             # update the FPS counter
@@ -149,7 +152,9 @@ class newTracker():
         elif key == ord("q"):
             # break
             return
-        
-        return centerX, centerY
+        if centerX == None or centerY == None:
+            return 0,0
+        else:
+            return centerX, centerY
     
         

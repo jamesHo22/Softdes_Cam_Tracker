@@ -75,12 +75,14 @@ class Controller:
         else:
             self.isRunning = True
 
-    def getControlInput(self,input):
+    def getControlInput(self,input,vs,tracker):
         """gets the posion that the controller is at"""
         if input == 'pygame':
             return self.mousePos
         elif input == 'openCV':
-            pass
+            return tracker.getPosition(vs)
+            
+            
             #get the opencv tracked cords
 
 #MARK: Model
@@ -109,7 +111,8 @@ class Model:
 
         # Make a tracker object
         newTracker = tracker.newTracker()
-        
+        vs = VideoStream(src=0).start()
+        newTracker = tracker.newTracker()
         
         #MARK: gameLoop
         while running:
@@ -120,9 +123,10 @@ class Model:
                 #handle events
                 self.controller.handleEvent(event)
                 running = self.controller.isRunning
-
+            
+            
             #update positions
-            cntPos = self.controller.getControlInput('pygame')
+            cntPos = self.controller.getControlInput('openCV',vs,newTracker)
             if cntPos != None:
                 ball.pos = cntPos
 
