@@ -8,10 +8,15 @@ pygame.init()
 
 #MARK: view
 class View:
-    """A class that handels updates to the user side display."""
+    """Handle updates to the user display"""
 
     def __init__(self,screenWidth = 600,screenHeight = 600, backgroundColor = (0,0,0)):
-        """sets up the view for the program"""
+        """Set up the View
+
+        Keyword arguments:
+        screenwidth(optional) -- the width of the screen generated in pixels
+        screenHeight(optional) -- the height of the screen generated in pixels
+        backgroundColor(optional) -- the color in rgb of the background of the screen"""
 
         #initalize the view variables
         self.width = screenWidth
