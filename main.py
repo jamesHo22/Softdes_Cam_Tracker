@@ -115,7 +115,8 @@ class Model:
         xAcc = np.gradient(xVel, dt)[-1]
         yAcc = np.gradient(yVel, dt)[-1]
         # print(f'x acc: {xAcc}, y acc: {yAcc}')
-        cutoff = 7000
+        print(xAcc)
+        cutoff = 8000
         threshold = 12000
         # print(xAcc)
         if xAcc >= cutoff and xAcc < threshold:
