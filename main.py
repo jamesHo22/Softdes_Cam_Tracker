@@ -6,14 +6,15 @@ import numpy as np
 import time
 #initalize pygame
 pygame.init()
-SCREEN_WIDTH = 600
+SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 600
 
 #MARK: view
 class View:
     """Handle updates to the user display"""
+    
 
-    def __init__(self,screenWidth = SCREEN_WIDTH,screenHeight = SCREEN_HEIGHT, backgroundColor = (0,0,0)):
+    def __init__(self,screenWidth = SCREEN_WIDTH, screenHeight = SCREEN_HEIGHT, backgroundColor = (0,0,0)):
         """Set up the View
 
         Keyword arguments:
@@ -22,8 +23,8 @@ class View:
         backgroundColor(optional) -- the color in rgb of the background of the screen"""
 
         #initalize the view variables
-        self.width = screenWidth
-        self.height = screenHeight
+        self.width = SCREEN_WIDTH
+        self.height = SCREEN_HEIGHT
         self.backgroundColor = backgroundColor
         self.objects = []
         #sets up the pygame display window
@@ -33,7 +34,8 @@ class View:
         """A function which creates a pygame window specified by the properties of the view."""
         #MARK: Window setup
         #create the pygame window of the designated size
-        self.window = pygame.display.set_mode((self.width,self.height))
+        print(self.width)
+        self.window = pygame.display.set_mode((self.width, self.height))
         #create a surface (layer) the same size as the window to draw the background on
         self.background = pygame.Surface(self.window.get_size())
         #paint the background black
@@ -89,7 +91,7 @@ class Controller:
             return self.mousePos
         elif input == 'openCV':
             X, Y = tracker.getPosition(vs)
-            return -X*2+SCREEN_WIDTH+SCREEN_WIDTH/2, Y*3-SCREEN_HEIGHT/2
+            return -X*2+SCREEN_WIDTH, Y*3-SCREEN_HEIGHT/2
             #get the opencv tracked cords
 
 #MARK: Model
@@ -113,16 +115,35 @@ class Model:
         xAcc = np.gradient(xVel, dt)[-1]
         yAcc = np.gradient(yVel, dt)[-1]
         # print(f'x acc: {xAcc}, y acc: {yAcc}')
-        cutoff = 10000
+        cutoff = 5500
+        threshold = 12000
         # print(xAcc)
-        if xAcc >= cutoff:
-            return xVel, yVel, True
+        if xAcc >= cutoff and xAcc < threshold:
+            return xVel[-1], yVel[-1], True
         else:
-            return currentX[-1], currentY[-1], False        
+            return currentX[-1], currentY[-1], False      
 
+    def throwBall(self, xVel, yVel, xInit, yInit, tEnd):
+        ACCELERATION = 100
+        '''
+        This function takes in velocities and computes trajectories that are then displayed to the user
+        '''  
+        times = np.linspace(0, tEnd, 20*tEnd)
+        xPos = np.ones(len(times)+1)
+        xPos[0] = xInit
+        yPos = np.ones(len(times)+1)
+        yPos[0] = yInit
+        for i in range(len(times)):
+            xPos[i+1] = xPos[i] + (xVel/40)*times[i]
+            yPos[i+1] = yPos[i] + (yVel/40)*times[i] + 0.5*ACCELERATION*times[i]**2
+        
+        ball = Ball(self.view)
+        ball.visible = True
 
-
-
+        for i in range(len(xPos)):
+            
+            ball.pos = xPos[i], yPos[i]
+            self.view.draw()
 
     def runGameLoop(self):
         #create the game objects
@@ -182,12 +203,17 @@ class Model:
                 thrown = ballState[2]
                 if thrown:
                     print('ball thrown')
-                cntPos = ballState[0:1]
+                    ball.visible = False
+                    xVel, yVel = ballState[0], ballState[1]
+                    self.throwBall(xVel, yVel, currentX[-1], currentY[-1], 3)
+
+                else:
+                    ball.visible = True
+                    cntPos = ballState[0], ballState[1]
             else:
                 currentX.append(cntPos[0])
                 currentY.append(cntPos[1])
                 timesteps.append(dt)
-                # print('yeet: ', timesteps)
             
             if cntPos != None:
                 ball.pos = cntPos
@@ -205,7 +231,7 @@ class GameObject:
         #if no positional argument was supplied
         if pos == None:
             #set the default position
-            pos = [300,300]
+            pos = [SCREEN_WIDTH/2,SCREEN_HEIGHT/2]
 
         #if no geometry was provided make the default circle
         if not geometry:
