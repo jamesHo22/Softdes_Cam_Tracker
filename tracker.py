@@ -104,7 +104,6 @@ class newTracker():
 
         # check to see if the tracking was a success
             if success:
-                print('track SUCCESS')
                 (x, y, w, h) = [int(v) for v in box]
                 centerX, centerY = int(x + w/2), int(y + h/2)
                 cv2.rectangle(frame, (x, y), (x + w, y + h),(0, 255, 0), 2)

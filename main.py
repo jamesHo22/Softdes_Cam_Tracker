@@ -2,15 +2,18 @@
 import pygame
 import tracker
 from imutils.video import VideoStream
+import numpy as np
+import time
 #initalize pygame
 pygame.init()
-
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
 
 #MARK: view
 class View:
     """Handle updates to the user display"""
 
-    def __init__(self,screenWidth = 600,screenHeight = 600, backgroundColor = (0,0,0)):
+    def __init__(self,screenWidth = SCREEN_WIDTH,screenHeight = SCREEN_HEIGHT, backgroundColor = (0,0,0)):
         """Set up the View
 
         Keyword arguments:
@@ -85,9 +88,8 @@ class Controller:
         if input == 'pygame':
             return self.mousePos
         elif input == 'openCV':
-            return tracker.getPosition(vs)
-            
-            
+            X, Y = tracker.getPosition(vs)
+            return -X*2+SCREEN_WIDTH+SCREEN_WIDTH/2, Y*3-SCREEN_HEIGHT/2
             #get the opencv tracked cords
 
 #MARK: Model
@@ -96,6 +98,31 @@ class Model:
         #create view, and controller objects
         self.view = View(640,700)
         self.controller = Controller()
+
+    def getBallPos(self, currentX, currentY, dt):
+        '''
+        This function encapsulates the physics of the ball motion.
+        (numpy.array) currentX: the current x position of the ball
+        (numpy.array) currentY: the current y position of the ball
+        (tuple) returns: new x and y
+        '''
+        # TODO: determine the acceleration of the ball
+        # Take the second derivative of both x and y lists
+        xVel = np.gradient(currentX, dt)
+        yVel = np.gradient(currentY, dt)
+        xAcc = np.gradient(xVel, dt)[-1]
+        yAcc = np.gradient(yVel, dt)[-1]
+        # print(f'x acc: {xAcc}, y acc: {yAcc}')
+        cutoff = 10000
+        # print(xAcc)
+        if xAcc >= cutoff:
+            return xVel, yVel, True
+        else:
+            return currentX[-1], currentY[-1], False        
+
+
+
+
 
     def runGameLoop(self):
         #create the game objects
@@ -120,8 +147,13 @@ class Model:
         newTracker = tracker.newTracker()
         
         #MARK: gameLoop
+        currentX = []
+        currentY = []
+        timesteps = []
+        N = 10
+        
         while running:
-
+            startTime = time.time()
             #MARK: event listeners
             for event in pygame.event.get():
 
@@ -132,6 +164,31 @@ class Model:
             
             #update positions
             cntPos = self.controller.getControlInput('openCV',vs,newTracker)
+            endTime = time.time()
+            dt = endTime-startTime
+            # TODO: check length of the currentX array
+            # If the length is longer than some number, compute the gradient then delete the last item and add new x to front
+            # Else, append to the array
+            if len(currentX) >= N:
+                timesteps = timesteps[1:]
+                timesteps.append(dt)
+
+                currentX = currentX[1:]
+                currentX.append(cntPos[0])
+
+                currentY = currentY[1:]
+                currentY.append(cntPos[1])
+                ballState = self.getBallPos(currentX, currentY, dt)
+                thrown = ballState[2]
+                if thrown:
+                    print('ball thrown')
+                cntPos = ballState[0:1]
+            else:
+                currentX.append(cntPos[0])
+                currentY.append(cntPos[1])
+                timesteps.append(dt)
+                # print('yeet: ', timesteps)
+            
             if cntPos != None:
                 ball.pos = cntPos
 
@@ -194,8 +251,9 @@ class GameObject:
 class Ball (GameObject):
     """A class which draws a ball on the screen"""
     def __init__(self,view, pos = [300,300],color = (255,140,0),radius = 30):
-
+        self.mass = 1
         super().__init__(view,pos,color,'circle',radius,0)
+
 
 class Goal (GameObject):
     """A class which draws a goal on the screen"""
