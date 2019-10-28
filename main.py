@@ -115,7 +115,7 @@ class Model:
         xAcc = np.gradient(xVel, dt)[-1]
         yAcc = np.gradient(yVel, dt)[-1]
         # print(f'x acc: {xAcc}, y acc: {yAcc}')
-        cutoff = 5500
+        cutoff = 7000
         threshold = 12000
         # print(xAcc)
         if xAcc >= cutoff and xAcc < threshold:
@@ -123,7 +123,7 @@ class Model:
         else:
             return currentX[-1], currentY[-1], False      
 
-    def throwBall(self, xVel, yVel, xInit, yInit, tEnd):
+    def throwBall(self, xVel, yVel, xInit, yInit, tEnd, goal):
         ACCELERATION = 100
         '''
         This function takes in velocities and computes trajectories that are then displayed to the user
@@ -141,16 +141,17 @@ class Model:
         ball.visible = True
 
         for i in range(len(xPos)):
-            
             ball.pos = xPos[i], yPos[i]
+            goal.ballInGoal(ball)
             self.view.draw()
 
     def runGameLoop(self):
         #create the game objects
 
         goal = Goal(self.view)
+        goal.visible = True
         startButton = Button(self.view)
-        startButton.visible = True
+        startButton.visible = False
 
         ball = Ball(self.view)
         ball.visible = True
@@ -205,7 +206,7 @@ class Model:
                     print('ball thrown')
                     ball.visible = False
                     xVel, yVel = ballState[0], ballState[1]
-                    self.throwBall(xVel, yVel, currentX[-1], currentY[-1], 3)
+                    self.throwBall(xVel, yVel, currentX[-1], currentY[-1], 3, goal)
 
                 else:
                     ball.visible = True
@@ -223,6 +224,7 @@ class Model:
 
         #quit the program and close the window
         pygame.quit()
+
 
 #MARK: object classes
 class GameObject:
@@ -283,9 +285,37 @@ class Ball (GameObject):
 
 class Goal (GameObject):
     """A class which draws a goal on the screen"""
-    def __init__(self,view, pos = [300,300],color = (255,255,255),width = 30,height = 30,thickness = 2):
+    def __init__(self,view, pos = [700,300],color = (255,255,255),width = 70,height = 30,thickness = 2):
 
         super().__init__(view,pos,color,'rectangle',width,height,thickness)
+    
+    def ballInGoal(self, ball):
+        """Check if the a ball is in the goal
+
+        (Ball) ball: the ball to check if there is a goal
+
+        Returns:
+        (bool):True if there is a ball in the goal and false if there isn`t"""
+        goalState = False
+        #if the ball is horrizontally in the hoop
+        if ball.pos[0] >= self.pos[0] and ball.pos[0]+ball.surface.get_width() <= self.pos[0]+self.surface.get_width() and ball.visible:
+            
+                #if the top of the ball is below the top surface and above the bottom surface of the goal
+            if ball.pos[1] >= self .pos[0] and ball.pos[1] <= self.surface.get_height()+self.pos[1]:
+                ballState = True
+                print("goal")
+            #if the top of the ball is above the top surface and the bottom surface of the ball is below the bottom surface of the goal
+            elif ball.pos[1] <= self .pos[0] and ball.pos[1]+ball.surface.get_height() >= self.surface.get_height()+self.pos[1]:
+                ballState = True
+                print("goal")
+            #if the bottom of the ball is below the top surface and above the bottom surface of the goal
+            elif ball.pos[1]+ball.surface.get_height() >= self .pos[0] and ball.pos[1]+ball.surface.get_height() <= self.surface.get_height()+self.pos[1]:
+                ballState = True
+                print("goal")
+            else:
+                ballState = False
+        else:
+            ballState = False
 
 class Button (GameObject):
     """A class which draws a button on the screen"""
