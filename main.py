@@ -194,8 +194,6 @@ class Model:
 
         goal = Goal(self.view)
         goal.visible = True
-        startButton = Button(self.view)
-        startButton.visible = False
 
         ball = Ball(self.view)
         ball.visible = True
@@ -383,7 +381,7 @@ class Goal (GameObject):
 
 def runGame(argv):
     """Runs the game when called
-    
+
     (tuple) argv: any command line arguments which were passed to the program"""
     model = Model()
     model.runGameLoop()
