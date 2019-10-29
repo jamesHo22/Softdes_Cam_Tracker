@@ -24,7 +24,7 @@ Once the ball is thrown, the final x and y velocities are passed to `throwBall()
 
 In summary, the model handles calculations such as finding the position of the ball after it has been thrown, or determining if a goal has been scored. A more detailed look in at the classes and programs involved in the 'main.py' program can be seen here.
 
-![alt text](/MP4-ulm.jpg "The UML diagram of main.py") 
+![alt text](/UML.jpg "The UML diagram of main.py") 
 
 One decision illustrated by the UML diagram above is the decision to make the Ball and Goal classes inherit from a shared Game Object class. With the general simplicity of each and the few numbers of them involved it likely would have been suficent to implement each as it's own seperate class. However building a parrent GameObject class allowed us to build a common interface for the view class to interface with these objects. The view treats each as merely a game object as it is able to call each's draw function to display it to the screen and it can get the arguments to inform what to display from the object's geometry property. The view does not have to worry about having to interface with each seperately. Also extracting the shared code allows the ball ang goal classes to focus on the unique functionality of each while relying on the underlying GameObject class to handle displaying them. Finally this decision allows for ease of expandability and ease of addition of new objects. A backboard class could be easily added by instantiating a rectangular Game object which has a function to redirect the ball, however the view class would not have to be changed and could easily accomodate the new object.
 
