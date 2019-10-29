@@ -10,4 +10,4 @@ pip install -r requirements.txt
 python main.py
 ```
 
-
+A detailed report of this repository can be found in `writeup.md`
