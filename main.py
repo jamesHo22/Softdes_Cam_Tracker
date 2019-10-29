@@ -192,10 +192,10 @@ class Model:
 
         #create the game objects
 
-        goal = Goal(self.view)
+        goal = Goal()
         goal.visible = True
 
-        ball = Ball(self.view)
+        ball = Ball()
         ball.visible = True
 
         #draw the content in the view
