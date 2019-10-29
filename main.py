@@ -57,7 +57,7 @@ class View:
         self.window.blit(self.background, (0,0))
 
         for obj in self.objects:
-            obj.draw(self)
+            obj.draw()
 
         #update the display
         pygame.display.flip()
@@ -192,10 +192,10 @@ class Model:
 
         #create the game objects
 
-        goal = Goal()
+        goal = Goal(self.view)
         goal.visible = True
 
-        ball = Ball()
+        ball = Ball(self.view)
         ball.visible = True
 
         #draw the content in the view
